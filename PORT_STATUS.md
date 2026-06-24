@@ -83,10 +83,62 @@ reflects. Status ✅ = verified current as of the date shown.
 | p3-submit-wastewater-analysis | p3-submit-wastewater-analysis.pl | `42794ce` | 2024-06-11 | ✅ |
 | p3-submit-whole-genome-SNP-analysis | p3-submit-whole-genome-SNP-analysis.pl | `a7ad47f` | 2026-04-08 | ✅ ported 2026-06 |
 | p3-tail | p3-tail.pl | `4049829` | 2019-10-25 | ✅ |
+| p3-all-contigs | p3-all-contigs.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-all-drugs | p3-all-drugs.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-all-genome-features | p3-all-genome-features.pl | `9d6470a` | 2025-06-06 | ✅ ported 2026-06 |
+| p3-all-sfs | p3-all-sfs.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-all-sfvts | p3-all-sfvts.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-all-subsystem-roles | p3-all-subsystem-roles.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-all-subsystems | p3-all-subsystems.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-all-taxonomies | p3-all-taxonomies.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-genome-contigs | p3-get-genome-contigs.pl | `79f2ddc` | 2025-07-16 | ✅ ported 2026-06 |
+| p3-get-genome-drugs | p3-get-genome-drugs.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-genome-expression | p3-get-genome-expression.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-genome-protein-regions | p3-get-genome-protein-regions.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-genome-protein-structures | p3-get-genome-protein-structures.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-genome-refseq-features | p3-get-genome-refseq-features.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-genome-sp-genes | p3-get-genome-sp-genes.pl | `a5b52e9` | 2026-03-12 | ✅ ported 2026-06 |
+| p3-get-genome-subsystems | p3-get-genome-subsystems.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-feature-protein-regions | p3-get-feature-protein-regions.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-feature-protein-structures | p3-get-feature-protein-structures.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-feature-subsystems | p3-get-feature-subsystems.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-features-in-regions | p3-get-features-in-regions.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-family-data | p3-get-family-data.pl | `d6fd225` | 2025-06-05 | ✅ ported 2026-06 |
+| p3-get-family-features | p3-get-family-features.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-sf-data | p3-get-sf-data.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-sf-variants | p3-get-sf-variants.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-subsystem-features | p3-get-subsystem-features.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-subsystem-roles | p3-get-subsystem-roles.pl | `9fbdbfe` | 2021-09-01 | ✅ ported 2026-06 |
+| p3-get-drug-genomes | p3-get-drug-genomes.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-taxonomy-data | p3-get-taxonomy-data.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-find-features | p3-find-features.pl | `69ad3c3` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-find-genomes | p3-find-genomes.pl | `d6fd225` | 2025-06-05 | ✅ ported 2026-06 |
+| p3-find-serology-data | p3-find-serology-data.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-find-surveillance-data | p3-find-surveillance-data.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-role-features | p3-role-features.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-get-genome-group | p3-get-genome-group.pl | `93ea60c` | 2025-08-05 | ✅ ported 2026-06 |
+| p3-get-feature-group | p3-get-feature-group.pl | `93ea60c` | 2025-08-05 | ✅ ported 2026-06 |
+| p3-put-genome-group | p3-put-genome-group.pl | `93ea60c` | 2025-08-05 | ✅ ported 2026-06 |
+| p3-put-feature-group | p3-put-feature-group.pl | `93ea60c` | 2025-08-05 | ✅ ported 2026-06 |
+| p3-list-genome-groups | p3-list-genome-groups.pl | `4049829` | 2019-10-25 | ✅ ported 2026-06 |
+| p3-list-feature-groups | p3-list-feature-groups.pl | `4049829` | 2019-10-25 | ✅ ported 2026-06 |
+| p3-genus-species | p3-genus-species.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-collate | p3-collate.pl | `4049829` | 2019-10-25 | ✅ ported 2026-06 |
+| p3-compare-cols | p3-compare-cols.pl | `4049829` | 2019-10-25 | ✅ ported 2026-06 |
+| p3-fasta-md5 | p3-fasta-md5.pl | `4049829` | 2019-10-25 | ✅ ported 2026-06 |
+| p3-file-filter | p3-file-filter.pl | `4049829` | 2019-10-25 | ✅ ported 2026-06 |
+| p3-merge | p3-merge.pl | `4049829` | 2019-10-25 | ✅ ported 2026-06 |
+| p3-pick | p3-pick.pl | `4049829` | 2019-10-25 | ✅ ported 2026-06 |
+| p3-pick-by-class | p3-pick-by-class.pl | `4049829` | 2019-10-25 | ✅ ported 2026-06 |
+| p3-pivot | p3-pivot.pl | `4049829` | 2019-10-25 | ✅ ported 2026-06 |
+| p3-shuffle | p3-shuffle.pl | `4049829` | 2019-10-25 | ✅ ported 2026-06 |
+| p3-stats | p3-stats.pl | `4049829` | 2019-10-25 | ✅ ported 2026-06 |
+| p3-tbl-to-fasta | p3-tbl-to-fasta.pl | `4049829` | 2019-10-25 | ✅ ported 2026-06 |
+| p3-tbl-to-html | p3-tbl-to-html.pl | `4049829` | 2019-10-25 | ✅ ported 2026-06 |
 
 Note: every pre-2026 port's last Perl change predates the Go SDK's initial commit
-(2026-02-04), so they reflect the final state of their scripts. The seven rows
-marked "2026-06" were ported/updated during the 2026-06 sync.
+(2026-02-04), so they reflect the final state of their scripts. Rows marked "2026-06"
+were ported during the 2026-06 sync sessions.
 
 Sync notes (2026-06-24):
 - p3-submit-MSA: `progressiveMauve` added to both Perl and Go (was in app spec but missing from both CLIs)
