@@ -21,6 +21,11 @@ const (
 	DefaultChunkSize = 25000
 	// DefaultMaxRetries is the default number of retry attempts for failed requests.
 	DefaultMaxRetries = 3
+	// DefaultUserAgent is sent on every request. The data API sits behind
+	// Cloudflare, which bans default library user-agents (error 1010); this
+	// value is allowlisted at the edge. Override via WithUserAgent or the
+	// P3_USER_AGENT environment variable.
+	DefaultUserAgent = "BV-BRC P3 Client"
 )
 
 // Client provides access to the BV-BRC Data API.
@@ -31,7 +36,8 @@ type Client struct {
 	ChunkSize  int
 	MaxRetries int
 	Debug      bool
-	Verbose    bool // Print retry messages to stderr
+	Verbose    bool   // Print retry messages to stderr
+	UserAgent  string // Sent as the User-Agent header (Cloudflare allowlist)
 }
 
 // ChunkInfo contains information about a response chunk from Content-Range header.
@@ -105,13 +111,27 @@ func WithVerbose(verbose bool) ClientOption {
 	}
 }
 
+// WithUserAgent sets the User-Agent header sent on every request.
+func WithUserAgent(ua string) ClientOption {
+	return func(c *Client) {
+		if ua != "" {
+			c.UserAgent = ua
+		}
+	}
+}
+
 // NewClient creates a new BV-BRC API client with the given options.
 func NewClient(opts ...ClientOption) *Client {
+	ua := os.Getenv("P3_USER_AGENT")
+	if ua == "" {
+		ua = DefaultUserAgent
+	}
 	c := &Client{
 		BaseURL:    DefaultBaseURL,
 		HTTPClient: &http.Client{Timeout: 30 * time.Second},
 		ChunkSize:  DefaultChunkSize,
 		MaxRetries: DefaultMaxRetries,
+		UserAgent:  ua,
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -449,7 +469,11 @@ func (c *Client) setHeaders(req *http.Request) {
 	if c.Token != "" {
 		req.Header.Set("Authorization", c.Token)
 	}
-	req.Header.Set("User-Agent", "BV-BRC-Go-Client/1.0")
+	ua := c.UserAgent
+	if ua == "" {
+		ua = DefaultUserAgent
+	}
+	req.Header.Set("User-Agent", ua)
 }
 
 // urlEncode encodes a string for use in URLs, using PATRIC-specific encoding.

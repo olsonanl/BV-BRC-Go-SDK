@@ -67,6 +67,9 @@ type DataOptions struct {
 	// Verbose enables verbose output (retry messages to stderr)
 	Verbose bool
 
+	// UserAgent overrides the User-Agent header sent to the data API
+	UserAgent string
+
 	// Sort specifies field(s) to sort by (prefix with - for descending)
 	Sort []string
 }
@@ -112,6 +115,8 @@ func AddDataFlags(cmd *cobra.Command, opts *DataOptions) {
 		"maximum retry attempts for failed requests (0 = use default)")
 	flags.BoolVarP(&opts.Verbose, "verbose", "v", false,
 		"print retry messages to stderr")
+	flags.StringVar(&opts.UserAgent, "user-agent", "",
+		"override the User-Agent header sent to the data API")
 	flags.StringSliceVar(&opts.Sort, "sort", nil,
 		"field(s) to sort by (prefix with - for descending, e.g. -genome_id)")
 

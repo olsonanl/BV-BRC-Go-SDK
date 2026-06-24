@@ -120,10 +120,10 @@ func run(cmd *cobra.Command, args []string) error {
 	outputPath = expandWorkspacePath(outputPath)
 	outputPath = strings.TrimSuffix(outputPath, "/")
 
-	// Verify output path exists and is a folder
-	meta, err := ws.Stat(outputPath, false)
-	if err != nil || !meta.IsFolder() {
-		return fmt.Errorf("output path %s does not exist or is not a directory", outputPath)
+	if !dryRun {
+		if err := ws.RequireFolder(outputPath); err != nil {
+			return err
+		}
 	}
 
 	// Set upload path default

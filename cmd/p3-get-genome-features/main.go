@@ -94,6 +94,9 @@ func run(cmd *cobra.Command, args []string) error {
 	if dataOpts.Verbose {
 		clientOpts = append(clientOpts, api.WithVerbose(true))
 	}
+	if dataOpts.UserAgent != "" {
+		clientOpts = append(clientOpts, api.WithUserAgent(dataOpts.UserAgent))
+	}
 	client := api.NewClient(clientOpts...)
 
 	// Handle --fields option

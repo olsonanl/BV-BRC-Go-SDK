@@ -63,22 +63,58 @@ def split_metadata(params):
 
 
 def extract_json(stdout):
-    """Parse the params JSON from a tool's stdout (Go prefixes a header line)."""
+    """Parse the first JSON object from a tool's stdout.
+
+    Uses raw_decode so trailing text (e.g. Perl dry-run footer lines) after the
+    closing brace is silently ignored — fixing false 'Extra data' parse errors.
+    """
     idx = stdout.find("{")
     if idx < 0:
         raise ValueError("no JSON object in output")
-    return json.loads(stdout[idx:])
+    obj, _ = json.JSONDecoder().raw_decode(stdout, idx)
+    return obj
+
+
+USER_ENV = "/home/olson/P3/dev-ubuntu/user-env.sh"
+
+
+def _env_with_user_env():
+    """Return an environment with user-env.sh sourced (for Perl wrappers)."""
+    import shlex
+    try:
+        result = subprocess.run(
+            ["bash", "-c", f"source {USER_ENV} 2>/dev/null && env"],
+            capture_output=True, text=True, timeout=10, stdin=subprocess.DEVNULL)
+        env = {}
+        for line in result.stdout.splitlines():
+            if "=" in line:
+                k, _, v = line.partition("=")
+                env[k] = v
+        return env or None
+    except Exception:
+        return None
+
+
+_sourced_env = None  # cached
 
 
 def run_tool(binpath, command, argv, out_path, out_name, dry_run, timeout):
+    global _sourced_env
     exe = os.path.join(binpath, command)
     cmd = [exe]
     if dry_run:
         cmd.append("--dry-run")
     cmd += argv + [out_path, out_name]
+    # For Perl wrappers, source user-env.sh so the correct data-API URL and
+    # PERL5LIB are in effect. Go binaries are self-contained and don't need it.
+    env = None
+    if binpath == DEFAULT_PERL_BIN:
+        if _sourced_env is None:
+            _sourced_env = _env_with_user_env()
+        env = _sourced_env
     try:
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
-                              stdin=subprocess.DEVNULL)
+                              stdin=subprocess.DEVNULL, env=env)
     except FileNotFoundError:
         return {"ok": False, "error": f"executable not found: {exe}", "cmd": cmd}
     except subprocess.TimeoutExpired:

@@ -97,6 +97,12 @@ func run(cmd *cobra.Command, args []string) error {
 	outputPath = expandWorkspacePath(outputPath)
 	outputPath = strings.TrimSuffix(outputPath, "/")
 
+	if !dryRun {
+		if err := ws.RequireFolder(outputPath); err != nil {
+			return err
+		}
+	}
+
 	if workspaceUploadDir == "" {
 		workspaceUploadDir = outputPath
 	}
