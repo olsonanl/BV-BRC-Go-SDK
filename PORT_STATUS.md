@@ -185,16 +185,15 @@ Notable categories:
 | `srr_libs:platform`, `srr_libs:sample_id`, `srr_libs:title` | FastqUtils, TaxonomicClassification | SRA library metadata; only `srr_accession` is expressible |
 | `numberOfSequences` | SequenceSubmission | Informational, not a CLI input |
 
-### Structural dialect difference: paired-end library specification
+### Paired-end library syntax — RESOLVED (2026-06-24)
 
-The Perl and Go CLIs use **different command-line syntax** for paired-end read libraries,
-which is handled by the test suite's `render.py` but represents a real user-facing
-divergence:
+Both CLIs now accept the same two-argument form:
 
-- **Perl** (`ReadSpec` with `=s{2}`): `--paired-end-lib read1.fq read2.fq` — two separate arguments
-- **Go**: `--paired-end-lib read1.fq,read2.fq` — a single comma-joined argument
+```
+--paired-end-lib read1.fq read2.fq
+```
 
-Both produce identical JSON (`{"read1": ..., "read2": ...}`), so the cross-check
-passes, but users switching between CLIs must use the different syntax. This is a
-deliberate Go simplification (avoids positional argument count ambiguity with cobra)
-but worth documenting for users and any future unified help text.
+Go's `NormalizePairedEndLibArgs` (`internal/cli/args.go`) pre-processes `os.Args`
+before cobra parses them, joining the two arguments into the internal comma form.
+The original comma-joined form (`--paired-end-lib read1.fq,read2.fq`) is still
+accepted for backwards compatibility.
