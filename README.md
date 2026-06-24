@@ -56,12 +56,33 @@ sudo cp bin/p3-* /usr/local/bin/
 > extract with `curl` rather than a browser (browser downloads set the quarantine
 > attribute; `curl`/`wget` do not).
 
+### Windows
+
+```powershell
+# x64 (most PCs)
+# Download bvbrc-cli-1.0.0-windows-amd64.zip from the releases page, then:
+Expand-Archive bvbrc-cli-1.0.0-windows-amd64.zip .
+# Copy the .exe files to a directory on your PATH, e.g.:
+Copy-Item windows-amd64\p3-*.exe C:\Windows\System32\
+p3-login
+```
+
+Or run the included install script as Administrator:
+```powershell
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
 ### Verification
 
 ```bash
-# Verify checksums
+# Linux / macOS: verify checksums
 curl -LO https://github.com/BV-BRC/BV-BRC-Go-SDK/releases/download/v1.0.0/bvbrc-cli-1.0.0-checksums.sha256
 sha256sum -c bvbrc-cli-1.0.0-checksums.sha256
+```
+
+```powershell
+# Windows: verify checksum of a single file
+Get-FileHash bvbrc-cli-1.0.0-windows-amd64.zip -Algorithm SHA256
 ```
 
 ## Getting Started
@@ -285,18 +306,18 @@ BVBRC_TEST_INTEGRATION=1 go test -v -run TestSmoke ./...
 
 Build scripts produce packages in `dist/`:
 
-| Platform | Package |
-|----------|---------|
-| Linux x86_64 | `bvbrc-cli-VERSION-linux-amd64.tar.gz` |
-| Linux ARM64 | `bvbrc-cli-VERSION-linux-arm64.tar.gz` |
-| Linux x86_64 (Debian) | `bvbrc-cli_VERSION_amd64.deb` |
-| Linux ARM64 (Debian) | `bvbrc-cli_VERSION_arm64.deb` |
-| macOS Intel | `bvbrc-cli-VERSION-darwin-amd64.tar.gz` |
-| macOS Apple Silicon | `bvbrc-cli-VERSION-darwin-arm64.tar.gz` |
-| Windows x64 | `bvbrc-cli-VERSION-windows-amd64.tar.gz` |
-| Windows ARM64 | `bvbrc-cli-VERSION-windows-arm64.tar.gz` |
+| Platform | Package | v1.0.0 SHA256 (first 16 chars) |
+|----------|---------|-------------------------------|
+| Linux x86_64 | `bvbrc-cli-VERSION-linux-amd64.tar.gz` | `5fd4d779ef72bb9a` |
+| Linux ARM64 | `bvbrc-cli-VERSION-linux-arm64.tar.gz` | `adce7b4deb8b2553` |
+| Linux x86_64 (Debian) | `bvbrc-cli_VERSION_amd64.deb` | — |
+| Linux ARM64 (Debian) | `bvbrc-cli_VERSION_arm64.deb` | — |
+| macOS Intel | `bvbrc-cli-VERSION-darwin-amd64.tar.gz` | `b268bae5ea1320a8` |
+| macOS Apple Silicon | `bvbrc-cli-VERSION-darwin-arm64.tar.gz` | `2ea3165d25e0fceb` |
+| Windows x64 | `bvbrc-cli-VERSION-windows-amd64.zip` | `d95f5cfd8936493f` |
+| Windows ARM64 | `bvbrc-cli-VERSION-windows-arm64.zip` | `a24020ae8b2975c1` |
 
-SHA256 checksums: `bvbrc-cli-VERSION-checksums.sha256`
+Full SHA256 checksums: `bvbrc-cli-VERSION-checksums.sha256`
 
 ## Project Structure
 
