@@ -333,8 +333,17 @@ jobs:
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
-          anaconda -t "$ANACONDA_API_TOKEN" upload \
-            --user bv-brc \
-            --force \
-            conda-dist/**/*.conda conda-dist/**/*.tar.bz2 2>/dev/null || true
+          set -euo pipefail
+          shopt -s globstar nullglob
+          files=(conda-dist/**/*.conda conda-dist/**/*.tar.bz2)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "::error::No conda packages found under conda-dist/" >&2
+            exit 1
+          fi
+          printf 'Uploading %d package(s):\n' "${#files[@]}"
+          printf '  %s\n' "${files[@]}"
+          # No 2>/dev/null || true: a token-scope/permission failure must fail the
+          # job, not silently pass. (api:write alone is insufficient — upload also
+          # needs api:read; the missing scope was being swallowed here.)
+          anaconda -t "$ANACONDA_API_TOKEN" upload --user bv-brc --force "${files[@]}"
           echo "Published to https://anaconda.org/bv-brc/bvbrc-cli"
