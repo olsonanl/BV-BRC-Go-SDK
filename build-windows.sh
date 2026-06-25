@@ -233,30 +233,38 @@ cd ..
 
 # Create NSIS installer script (for building on Windows with NSIS)
 mkdir -p "$OUTPUT_DIR/nsis"
-cat > "$OUTPUT_DIR/nsis/bvbrc-cli.nsi" << 'EOF'
+# Parse VERSION into major.minor.build for NSIS
+IFS='.' read -r VER_MAJOR VER_MINOR VER_BUILD <<< "${VERSION:-1.0.0}"
+VER_MAJOR=${VER_MAJOR:-1}; VER_MINOR=${VER_MINOR:-0}; VER_BUILD=${VER_BUILD:-0}
+OUTFILE="bvbrc-cli-${VERSION}-windows-amd64-setup.exe"
+
+cat > "$OUTPUT_DIR/nsis/bvbrc-cli.nsi" << NSIS_EOF
 ; BV-BRC CLI Tools NSIS Installer Script
 ; Compile with: makensis bvbrc-cli.nsi
+; No external plugins required — PATH is set via registry directly.
 
 !define APPNAME "BV-BRC CLI Tools"
 !define COMPANYNAME "BV-BRC"
 !define DESCRIPTION "Command-line tools for BV-BRC"
-!define VERSIONMAJOR 1
-!define VERSIONMINOR 0
-!define VERSIONBUILD 0
-!define INSTALLSIZE 150000
+!define VERSIONMAJOR ${VER_MAJOR}
+!define VERSIONMINOR ${VER_MINOR}
+!define VERSIONBUILD ${VER_BUILD}
+!define APPVERSION "${VERSION}"
+!define INSTALLSIZE 350000
+!define REGKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\BV-BRC CLI Tools"
 
 RequestExecutionLevel admin
 
-InstallDir "$PROGRAMFILES\BVBRC"
+InstallDir "\$PROGRAMFILES64\BVBRC"
 
-Name "${APPNAME}"
-Icon "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
-OutFile "bvbrc-cli-setup.exe"
+Name "\${APPNAME} \${APPVERSION}"
+Icon "\${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
+OutFile "${OUTFILE}"
 
 !include "MUI2.nsh"
 
 !define MUI_ABORTWARNING
-!define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
+!define MUI_ICON "\${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "license.txt"
@@ -269,47 +277,67 @@ OutFile "bvbrc-cli-setup.exe"
 
 !insertmacro MUI_LANGUAGE "English"
 
+; Helper: append a directory to the system PATH via registry (no plugin needed)
+!macro AddToPath dir
+    ReadRegStr \$0 HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path"
+    ; Only add if not already present
+    \${StrContains} \$1 "${dir}" "\$0"
+    StrCmp \$1 "" 0 +3
+        WriteRegExpandStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path" "\$0;${dir}"
+        SendMessage \${HWND_BROADCAST} \${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+!macroend
+
+!macro RemoveFromPath dir
+    ReadRegStr \$0 HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path"
+    \${StrStr} \$1 "\$0" ";${dir}"
+    StrCmp \$1 "" +2
+        \${StrReplace} \$0 "\$0" ";${dir}" ""
+    WriteRegExpandStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path" "\$0"
+    SendMessage \${HWND_BROADCAST} \${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+!macroend
+
+!include "StrFunc.nsh"
+\${StrContains}
+\${StrStr}
+\${StrReplace}
+
 Section "Install"
-    SetOutPath $INSTDIR
+    SetOutPath \$INSTDIR
 
     ; Copy all executables
     File "*.exe"
 
     ; Create uninstaller
-    WriteUninstaller "$INSTDIR\uninstall.exe"
+    WriteUninstaller "\$INSTDIR\uninstall.exe"
 
-    ; Add to PATH
-    EnVar::AddValue "PATH" "$INSTDIR"
-
-    ; Create Start Menu shortcuts
-    CreateDirectory "$SMPROGRAMS\${APPNAME}"
-    CreateShortCut "$SMPROGRAMS\${APPNAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe"
+    ; Add install dir to system PATH
+    !insertmacro AddToPath "\$INSTDIR"
 
     ; Add uninstall information to Add/Remove Programs
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayName" "${APPNAME}"
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "InstallLocation" "$INSTDIR"
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "Publisher" "${COMPANYNAME}"
-    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayVersion" "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}"
-    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "EstimatedSize" ${INSTALLSIZE}
+    WriteRegStr HKLM "\${REGKEY}" "DisplayName" "\${APPNAME} \${APPVERSION}"
+    WriteRegStr HKLM "\${REGKEY}" "UninstallString" '"\$INSTDIR\uninstall.exe"'
+    WriteRegStr HKLM "\${REGKEY}" "InstallLocation" "\$INSTDIR"
+    WriteRegStr HKLM "\${REGKEY}" "Publisher" "\${COMPANYNAME}"
+    WriteRegStr HKLM "\${REGKEY}" "DisplayVersion" "\${APPVERSION}"
+    WriteRegDWORD HKLM "\${REGKEY}" "EstimatedSize" \${INSTALLSIZE}
 SectionEnd
 
 Section "Uninstall"
-    ; Remove from PATH
-    EnVar::DeleteValue "PATH" "$INSTDIR"
+    ; Remove install dir from PATH
+    !insertmacro RemoveFromPath "\$INSTDIR"
 
     ; Remove files
-    Delete "$INSTDIR\*.exe"
-    Delete "$INSTDIR\uninstall.exe"
+    Delete "\$INSTDIR\*.exe"
+    Delete "\$INSTDIR\uninstall.exe"
+    RMDir "\$INSTDIR"
 
-    ; Remove directories
-    RMDir "$INSTDIR"
-    RMDir "$SMPROGRAMS\${APPNAME}"
-
-    ; Remove uninstall information
-    DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}"
+    ; Remove uninstall registry key
+    DeleteRegKey HKLM "\${REGKEY}"
 SectionEnd
-EOF
+NSIS_EOF
+
+# Export the expected output filename for the workflow
+echo "NSIS_OUTFILE=${OUTFILE}" >> "${GITHUB_ENV:-/dev/null}"
 
 # Create license file for NSIS
 cat > "$OUTPUT_DIR/nsis/license.txt" << 'EOF'
