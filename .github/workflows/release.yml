@@ -27,7 +27,7 @@ jobs:
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
 
       - name: Build Linux amd64 + arm64
-        run: VERSION=${{ env.VERSION }} bash build-linux.sh
+        run: GO=go VERSION=${{ env.VERSION }} bash build-linux.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -56,11 +56,11 @@ jobs:
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
 
       - name: Build macOS tarballs (amd64 + arm64)
-        run: VERSION=${{ env.VERSION }} bash build-macos.sh
+        run: GO=go VERSION=${{ env.VERSION }} bash build-macos.sh
 
       - name: Build macOS .pkg installers (unsigned)
         run: |
-          VERSION=${{ env.VERSION }} bash build-macos-pkg.sh
+          GO=go VERSION=${{ env.VERSION }} bash build-macos-pkg.sh
           # build-macos-pkg.sh prepares the payload; run the on-mac helper
           cd dist && bash build-pkg-on-macos.sh
 
@@ -112,7 +112,7 @@ jobs:
 
       - name: Build Windows .zip packages
         shell: bash
-        run: VERSION=${{ env.VERSION }} bash build-windows.sh
+        run: GO=go VERSION=${{ env.VERSION }} bash build-windows.sh
 
       - name: Install NSIS
         shell: pwsh
