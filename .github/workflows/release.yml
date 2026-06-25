@@ -176,6 +176,20 @@ jobs:
         working-directory: release-assets
         run: ls -lh
 
+      # `gh release upload` requires the release to already exist. A bare tag
+      # push does not create one, so create it (as a prerelease) if absent.
+      # An already-existing release (e.g. one created manually) is left as-is.
+      - name: Ensure GitHub Release exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "${{ github.ref_name }}" --repo ${{ github.repository }} >/dev/null 2>&1 \
+            || gh release create "${{ github.ref_name }}" \
+                 --repo ${{ github.repository }} \
+                 --title "${{ github.ref_name }}" \
+                 --generate-notes \
+                 --prerelease
+
       - name: Upload assets to GitHub Release
         working-directory: release-assets
         env:
