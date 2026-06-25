@@ -178,17 +178,22 @@ jobs:
 
       # `gh release upload` requires the release to already exist. A bare tag
       # push does not create one, so create it (as a prerelease) if absent.
-      # An already-existing release (e.g. one created manually) is left as-is.
-      - name: Ensure GitHub Release exists
+      # If one already exists as a DRAFT (e.g. created manually), publish it:
+      # draft releases do not serve assets at the public releases/download/<tag>/
+      # URL, which the conda-publish job's checksum fetch and meta.yaml `source:
+      # url:` both download from (they would 404 against a draft).
+      - name: Ensure GitHub Release exists and is published
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view "${{ github.ref_name }}" --repo ${{ github.repository }} >/dev/null 2>&1 \
-            || gh release create "${{ github.ref_name }}" \
-                 --repo ${{ github.repository }} \
-                 --title "${{ github.ref_name }}" \
-                 --generate-notes \
-                 --prerelease
+          tag="${{ github.ref_name }}"
+          repo="${{ github.repository }}"
+          if gh release view "$tag" --repo "$repo" >/dev/null 2>&1; then
+            gh release edit "$tag" --repo "$repo" --draft=false   # no-op if already published; preserves prerelease flag
+          else
+            gh release create "$tag" --repo "$repo" \
+              --title "$tag" --generate-notes --prerelease
+          fi
 
       - name: Upload assets to GitHub Release
         working-directory: release-assets
