@@ -18,7 +18,13 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
-REPO="BV-BRC/BV-BRC-Go-SDK"
+# Download assets from whichever repo the release was published to. In CI,
+# GITHUB_REPOSITORY is set automatically to the repo running the workflow (the
+# same value the release job passes to `gh release upload --repo`), so the
+# upload and download sides stay consistent whether the tag is pushed to
+# BV-BRC/... or a fork (e.g. olsonanl/...). Falls back to the canonical repo
+# for local/manual runs.
+REPO="${GITHUB_REPOSITORY:-BV-BRC/BV-BRC-Go-SDK}"
 BASE_URL="https://github.com/${REPO}/releases/download/v${VERSION}"
 RECIPE="$(cd "$(dirname "$0")/.." && pwd)/conda-recipe/meta.yaml"
 

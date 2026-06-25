@@ -1,4 +1,5 @@
 {% set version = environ.get("VERSION", "2.0.0") %}
+{% set repo = environ.get("GITHUB_REPOSITORY", "BV-BRC/BV-BRC-Go-SDK") %}
 
 package:
   name: bvbrc-cli
@@ -6,14 +7,16 @@ package:
 
 # Platform-specific pre-built binary tarballs from GitHub Releases.
 # sha256 values are updated by scripts/update-conda-recipe.sh before each release.
+# {{ repo }} comes from GITHUB_REPOSITORY in CI so the download repo matches the
+# one the release job uploaded to; defaults to the canonical repo for local builds.
 source:
-  - url: https://github.com/BV-BRC/BV-BRC-Go-SDK/releases/download/v{{ version }}/bvbrc-cli-{{ version }}-linux-amd64.tar.gz  # [linux and x86_64]
+  - url: https://github.com/{{ repo }}/releases/download/v{{ version }}/bvbrc-cli-{{ version }}-linux-amd64.tar.gz  # [linux and x86_64]
     sha256: 2a9712d7e0dd9eeea682f93bc5cb2c04e1e3ccebe5af5b6e8f7b501afd8e9b8a  # [linux and x86_64]
-  - url: https://github.com/BV-BRC/BV-BRC-Go-SDK/releases/download/v{{ version }}/bvbrc-cli-{{ version }}-linux-arm64.tar.gz  # [linux and aarch64]
+  - url: https://github.com/{{ repo }}/releases/download/v{{ version }}/bvbrc-cli-{{ version }}-linux-arm64.tar.gz  # [linux and aarch64]
     sha256: 799a33fe2e8bc874ecc5e12fdc4f1e853a5e7bee3ff2f9bb432801bb988f0a78  # [linux and aarch64]
-  - url: https://github.com/BV-BRC/BV-BRC-Go-SDK/releases/download/v{{ version }}/bvbrc-cli-{{ version }}-darwin-amd64.tar.gz  # [osx and x86_64]
+  - url: https://github.com/{{ repo }}/releases/download/v{{ version }}/bvbrc-cli-{{ version }}-darwin-amd64.tar.gz  # [osx and x86_64]
     sha256: e3aca65d6a78d52a6155bc2af5493c50d64f971e5c05342d6ee07f1a749c5c6a  # [osx and x86_64]
-  - url: https://github.com/BV-BRC/BV-BRC-Go-SDK/releases/download/v{{ version }}/bvbrc-cli-{{ version }}-darwin-arm64.tar.gz  # [osx and arm64]
+  - url: https://github.com/{{ repo }}/releases/download/v{{ version }}/bvbrc-cli-{{ version }}-darwin-arm64.tar.gz  # [osx and arm64]
     sha256: ad430fcb2b33b0f732fa999548f0d2548924564fb824c1ab2467bf55ac8954f8  # [osx and arm64]
 
 build:
