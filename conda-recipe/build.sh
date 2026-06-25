@@ -1,17 +1,25 @@
 #!/bin/bash
 # Install pre-built BV-BRC CLI binaries into the conda prefix.
-# The source tarball unpacks as bin/p3-* in the working directory.
+#
+# The release tarball is rooted at bin/p3-*, but conda-build flattens a source
+# tarball whose contents are a single top-level directory: it strips the leading
+# bin/ and the p3-* binaries land directly in the work dir. So depending on the
+# layout the binaries are either in ./bin/ or in . — handle both.
 
 set -euo pipefail
 
-# Binaries land in bin/ after the source tarball is extracted
-if [ ! -d "bin" ]; then
-    echo "ERROR: expected bin/ directory from source tarball not found" >&2
+install -d "$PREFIX/bin"
+
+if compgen -G "bin/p3-*" > /dev/null; then
+    src="bin"
+elif compgen -G "p3-*" > /dev/null; then
+    src="."
+else
+    echo "ERROR: no p3-* binaries found in source tarball (looked in ./bin and .)" >&2
+    ls -la >&2
     exit 1
 fi
 
-# Copy all p3-* binaries to the conda prefix bin directory
-install -d "$PREFIX/bin"
-install -m 755 bin/p3-* "$PREFIX/bin/"
+install -m 755 "$src"/p3-* "$PREFIX/bin/"
 
-echo "Installed $(ls bin/p3-* | wc -l) BV-BRC CLI tools to $PREFIX/bin/"
+echo "Installed $(ls "$src"/p3-* | wc -l) BV-BRC CLI tools to $PREFIX/bin/"
