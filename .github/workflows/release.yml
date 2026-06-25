@@ -342,8 +342,12 @@ jobs:
           fi
           printf 'Uploading %d package(s):\n' "${#files[@]}"
           printf '  %s\n' "${files[@]}"
+          # setup-miniconda initializes the `conda` shell function but does not put
+          # base's bin/ on PATH, so `anaconda` (a standalone binary in $CONDA/bin,
+          # installed there by the conda-build/anaconda-client step) is not found by
+          # name — call it by explicit path. ($CONDA is set by setup-miniconda.)
           # No 2>/dev/null || true: a token-scope/permission failure must fail the
           # job, not silently pass. (api:write alone is insufficient — upload also
-          # needs api:read; the missing scope was being swallowed here.)
-          anaconda -t "$ANACONDA_API_TOKEN" upload --user bv-brc --force "${files[@]}"
+          # needs api:read.)
+          "$CONDA/bin/anaconda" -t "$ANACONDA_API_TOKEN" upload --user bv-brc --force "${files[@]}"
           echo "Published to https://anaconda.org/bv-brc/bvbrc-cli"
