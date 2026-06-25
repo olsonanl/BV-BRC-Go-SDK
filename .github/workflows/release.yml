@@ -263,11 +263,14 @@ jobs:
           miniforge-version: latest        # miniforge = no Anaconda Inc. license
           channels: conda-forge
           channel-priority: strict
-          activate-environment: build-env
+          # No activate-environment: stay in base. `conda build` is provided by a
+          # plugin loaded by the base `conda`, so conda-build must live in base
+          # (installing it into a sub-env yields "invalid choice: 'build'").
+          # anaconda-client also goes in base so `anaconda` is on PATH for upload.
 
       - name: Install conda-build and anaconda-client
         shell: bash -l {0}
-        run: conda install -y conda-build anaconda-client
+        run: conda install -n base -y conda-build anaconda-client
 
       - name: Build conda packages (linux-64)
         shell: bash -l {0}
