@@ -199,7 +199,50 @@ jobs:
             --clobber
 
   # -----------------------------------------------------------------------
-  # Job 5: Build conda packages and publish to anaconda.org/bv-brc
+  # Job 5: Build Apptainer/Singularity .sif images with the CLI preinstalled
+  # -----------------------------------------------------------------------
+  build-apptainer:
+    name: Build Apptainer SIF (${{ matrix.distro }})
+    needs: release          # release must exist before `gh release upload`
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { distro: ubuntu-22, base: ubuntu:22.04 }
+          - { distro: ubuntu-24, base: ubuntu:24.04 }
+          - { distro: rocky-9,   base: rockylinux:9 }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set VERSION from tag
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+
+      # The linux-amd64 tarball built by the build-linux job (same run) is the
+      # exact set of binaries embedded into the image — no Go rebuild needed.
+      - name: Download linux tarballs
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-dist
+          path: dist
+
+      - name: Install Apptainer
+        uses: eWaterCycle/setup-apptainer@v2
+
+      - name: Build SIF
+        run: VERSION=${{ env.VERSION }} bash build-apptainer.sh ${{ matrix.distro }}
+
+      - name: Upload SIF to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.ref_name }}" \
+            dist/bvbrc-cli-${{ env.VERSION }}-${{ matrix.distro }}-amd64.sif \
+            --repo ${{ github.repository }} \
+            --clobber
+
+  # -----------------------------------------------------------------------
+  # Job 6: Build conda packages and publish to anaconda.org/bv-brc
   # -----------------------------------------------------------------------
   conda-publish:
     name: Publish conda packages
