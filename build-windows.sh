@@ -241,17 +241,14 @@ OUTFILE="bvbrc-cli-${VERSION}-windows-amd64-setup.exe"
 cat > "$OUTPUT_DIR/nsis/bvbrc-cli.nsi" << NSIS_EOF
 ; BV-BRC CLI Tools NSIS Installer Script
 ; Compile with: makensis bvbrc-cli.nsi
-; No external plugins required — PATH is set via registry directly.
+; No external plugins required.
 
 !define APPNAME "BV-BRC CLI Tools"
 !define COMPANYNAME "BV-BRC"
-!define DESCRIPTION "Command-line tools for BV-BRC"
-!define VERSIONMAJOR ${VER_MAJOR}
-!define VERSIONMINOR ${VER_MINOR}
-!define VERSIONBUILD ${VER_BUILD}
 !define APPVERSION "${VERSION}"
 !define INSTALLSIZE 350000
 !define REGKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\BV-BRC CLI Tools"
+!define PATHKEY "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
 
 RequestExecutionLevel admin
 
@@ -262,44 +259,15 @@ Icon "\${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 OutFile "${OUTFILE}"
 
 !include "MUI2.nsh"
-
 !define MUI_ABORTWARNING
-!define MUI_ICON "\${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
-
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "license.txt"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
-
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
-
 !insertmacro MUI_LANGUAGE "English"
-
-; Helper: append a directory to the system PATH via registry (no plugin needed)
-!macro AddToPath dir
-    ReadRegStr \$0 HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path"
-    ; Only add if not already present
-    \${StrContains} \$1 "${dir}" "\$0"
-    StrCmp \$1 "" 0 +3
-        WriteRegExpandStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path" "\$0;${dir}"
-        SendMessage \${HWND_BROADCAST} \${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-!macroend
-
-!macro RemoveFromPath dir
-    ReadRegStr \$0 HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path"
-    \${StrStr} \$1 "\$0" ";${dir}"
-    StrCmp \$1 "" +2
-        \${StrReplace} \$0 "\$0" ";${dir}" ""
-    WriteRegExpandStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "Path" "\$0"
-    SendMessage \${HWND_BROADCAST} \${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-!macroend
-
-!include "StrFunc.nsh"
-\${StrContains}
-\${StrStr}
-\${StrReplace}
 
 Section "Install"
     SetOutPath \$INSTDIR
@@ -310,8 +278,10 @@ Section "Install"
     ; Create uninstaller
     WriteUninstaller "\$INSTDIR\uninstall.exe"
 
-    ; Add install dir to system PATH
-    !insertmacro AddToPath "\$INSTDIR"
+    ; Add install dir to system PATH (append via registry — no plugin needed)
+    ReadRegStr \$0 HKLM "\${PATHKEY}" "Path"
+    WriteRegExpandStr HKLM "\${PATHKEY}" "Path" "\$0;\$INSTDIR"
+    SendMessage \${HWND_BROADCAST} \${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
     ; Add uninstall information to Add/Remove Programs
     WriteRegStr HKLM "\${REGKEY}" "DisplayName" "\${APPNAME} \${APPVERSION}"
@@ -323,9 +293,6 @@ Section "Install"
 SectionEnd
 
 Section "Uninstall"
-    ; Remove install dir from PATH
-    !insertmacro RemoveFromPath "\$INSTDIR"
-
     ; Remove files
     Delete "\$INSTDIR\*.exe"
     Delete "\$INSTDIR\uninstall.exe"

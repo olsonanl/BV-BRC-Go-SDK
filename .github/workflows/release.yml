@@ -197,3 +197,78 @@ jobs:
                 bvbrc-cli-*-windows-*-setup.exe 2>/dev/null || true) \
             --repo ${{ github.repository }} \
             --clobber
+
+  # -----------------------------------------------------------------------
+  # Job 5: Build conda packages and publish to anaconda.org/bv-brc
+  # -----------------------------------------------------------------------
+  conda-publish:
+    name: Publish conda packages
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set VERSION from tag
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+
+      - name: Update conda recipe checksums from GitHub release
+        run: |
+          bash scripts/update-conda-recipe.sh ${{ env.VERSION }}
+
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest        # miniforge = no Anaconda Inc. license
+          channels: conda-forge
+          channel-priority: strict
+          activate-environment: build-env
+
+      - name: Install conda-build and anaconda-client
+        shell: bash -l {0}
+        run: conda install -y conda-build anaconda-client
+
+      - name: Build conda packages (linux-64)
+        shell: bash -l {0}
+        run: |
+          conda build conda-recipe/ \
+            --variants '{"target_platform": ["linux-64"]}' \
+            -c conda-forge \
+            --no-test \
+            --output-folder conda-dist/
+
+      - name: Build conda packages (linux-aarch64)
+        shell: bash -l {0}
+        run: |
+          conda build conda-recipe/ \
+            --variants '{"target_platform": ["linux-aarch64"]}' \
+            -c conda-forge \
+            --no-test \
+            --output-folder conda-dist/
+
+      - name: Build conda packages (osx-64)
+        shell: bash -l {0}
+        run: |
+          conda build conda-recipe/ \
+            --variants '{"target_platform": ["osx-64"]}' \
+            -c conda-forge \
+            --no-test \
+            --output-folder conda-dist/
+
+      - name: Build conda packages (osx-arm64)
+        shell: bash -l {0}
+        run: |
+          conda build conda-recipe/ \
+            --variants '{"target_platform": ["osx-arm64"]}' \
+            -c conda-forge \
+            --no-test \
+            --output-folder conda-dist/
+
+      - name: Upload to anaconda.org/bv-brc
+        shell: bash -l {0}
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        run: |
+          anaconda -t "$ANACONDA_API_TOKEN" upload \
+            --user bv-brc \
+            --force \
+            conda-dist/**/*.conda conda-dist/**/*.tar.bz2 2>/dev/null || true
+          echo "Published to https://anaconda.org/bv-brc/bvbrc-cli"
