@@ -73,7 +73,7 @@ if [[ "$family" == "debian" ]]; then
     apt-get -y update
     apt-get -y install --no-install-recommends ca-certificates
     apt-get clean && rm -rf /var/lib/apt/lists/*
-    tar -xzf /opt/bvbrc-cli.tar.gz -C /usr/local
+    tar -xzf /opt/bvbrc-cli.tar.gz -C /usr/local --strip-components=1   # strip bvbrc-cli-<ver>-<plat>/ wrapper -> /usr/local/bin
     rm /opt/bvbrc-cli.tar.gz
 EOF
 )
@@ -81,7 +81,7 @@ else
     post_block=$(cat <<'EOF'
     dnf -y install ca-certificates || true
     dnf clean all
-    tar -xzf /opt/bvbrc-cli.tar.gz -C /usr/local
+    tar -xzf /opt/bvbrc-cli.tar.gz -C /usr/local --strip-components=1   # strip bvbrc-cli-<ver>-<plat>/ wrapper -> /usr/local/bin
     rm /opt/bvbrc-cli.tar.gz
 EOF
 )

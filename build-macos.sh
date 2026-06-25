@@ -11,6 +11,7 @@ OUTPUT_DIR="dist"
 PKG_ID="org.bvbrc.cli"
 
 cd "$(dirname "$0")"
+SDK_DIR="$(pwd)"
 
 # Get list of all commands
 COMMANDS=$(ls -d cmd/p3-*/ | xargs -n1 basename)
@@ -64,18 +65,24 @@ echo "Creating distribution archives..."
 
 cd "$OUTPUT_DIR"
 
-# Intel tarball
-tar -czf "bvbrc-cli-${VERSION}-darwin-amd64.tar.gz" -C darwin-amd64 bin
-echo "  Created bvbrc-cli-${VERSION}-darwin-amd64.tar.gz"
+# Each archive expands into a versioned directory containing bin/, README, and
+# LICENSE (rather than a bare bin/).
+stage_darwin() {
+    local plat="$1"   # darwin-amd64 | darwin-arm64 | darwin-universal
+    local stage="bvbrc-cli-${VERSION}-${plat}"
+    rm -rf "$stage"
+    mkdir -p "$stage"
+    cp -R "${plat}/bin" "$stage/bin"
+    bash "$SDK_DIR/scripts/make-readme.sh" "$VERSION" "$plat" > "$stage/README.md"
+    cp "$SDK_DIR/LICENSE" "$stage/LICENSE"
+    tar -czf "${stage}.tar.gz" "$stage"
+    echo "  Created ${stage}.tar.gz"
+}
 
-# ARM64 tarball
-tar -czf "bvbrc-cli-${VERSION}-darwin-arm64.tar.gz" -C darwin-arm64 bin
-echo "  Created bvbrc-cli-${VERSION}-darwin-arm64.tar.gz"
-
-# Universal tarball (if created)
+stage_darwin darwin-amd64
+stage_darwin darwin-arm64
 if [ -d "darwin-universal/bin" ] && [ "$(ls -A darwin-universal/bin)" ]; then
-    tar -czf "bvbrc-cli-${VERSION}-darwin-universal.tar.gz" -C darwin-universal bin
-    echo "  Created bvbrc-cli-${VERSION}-darwin-universal.tar.gz"
+    stage_darwin darwin-universal
 fi
 
 cd ..
