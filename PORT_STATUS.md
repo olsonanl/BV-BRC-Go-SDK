@@ -44,7 +44,7 @@ reflects. Status ✅ = verified current as of the date shown.
 
 | Go command | Perl script | Synced to | p3_cli date | Status |
 |---|---|---|---|---|
-| p3-all-genomes | p3-all-genomes.pl | `0ddd93c` | 2025-06-04 | ✅ |
+| p3-all-genomes | p3-all-genomes.pl | `0ddd93c` | 2025-06-04 | ✅ id-centric fix 2026-06 |
 | p3-count | p3-count.pl | `9fbdbfe` | 2021-09-01 | ✅ |
 | p3-echo | p3-echo.pl | `4049829` | 2019-10-25 | ✅ |
 | p3-extract | p3-extract.pl | `4049829` | 2019-10-25 | ✅ |
@@ -83,14 +83,14 @@ reflects. Status ✅ = verified current as of the date shown.
 | p3-submit-wastewater-analysis | p3-submit-wastewater-analysis.pl | `42794ce` | 2024-06-11 | ✅ |
 | p3-submit-whole-genome-SNP-analysis | p3-submit-whole-genome-SNP-analysis.pl | `a7ad47f` | 2026-04-08 | ✅ ported 2026-06 |
 | p3-tail | p3-tail.pl | `4049829` | 2019-10-25 | ✅ |
-| p3-all-contigs | p3-all-contigs.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
-| p3-all-drugs | p3-all-drugs.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
-| p3-all-genome-features | p3-all-genome-features.pl | `9d6470a` | 2025-06-06 | ✅ ported 2026-06 |
-| p3-all-sfs | p3-all-sfs.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
-| p3-all-sfvts | p3-all-sfvts.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
-| p3-all-subsystem-roles | p3-all-subsystem-roles.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
-| p3-all-subsystems | p3-all-subsystems.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
-| p3-all-taxonomies | p3-all-taxonomies.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
+| p3-all-contigs | p3-all-contigs.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06; id-centric fix |
+| p3-all-drugs | p3-all-drugs.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06; id-centric fix |
+| p3-all-genome-features | p3-all-genome-features.pl | `9d6470a` | 2025-06-06 | ✅ ported 2026-06; id-centric fix |
+| p3-all-sfs | p3-all-sfs.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06; id-centric fix |
+| p3-all-sfvts | p3-all-sfvts.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06; id-centric fix |
+| p3-all-subsystem-roles | p3-all-subsystem-roles.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06; id-centric fix |
+| p3-all-subsystems | p3-all-subsystems.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06; id-centric fix |
+| p3-all-taxonomies | p3-all-taxonomies.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06; id-centric fix |
 | p3-get-genome-contigs | p3-get-genome-contigs.pl | `79f2ddc` | 2025-07-16 | ✅ ported 2026-06 |
 | p3-get-genome-drugs | p3-get-genome-drugs.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
 | p3-get-genome-expression | p3-get-genome-expression.pl | `0ddd93c` | 2025-06-04 | ✅ ported 2026-06 |
@@ -157,7 +157,8 @@ against p3_cli here:
 - Workspace operations (mirror `Workspace/scripts/`): `p3-cat`, `p3-cp`, `p3-ls`,
   `p3-mkdir`, `p3-rm`
 - Auth / SDK built-ins: `p3-login`, `p3-logout`, `p3-whoami`
-- `p3-all-features` (verify source before treating as a p3_cli port)
+- `p3-all-features` (verify source before treating as a p3_cli port; received the
+  same id-centric output fix as the tracked `p3-all-*` commands)
 
 ---
 
@@ -200,6 +201,12 @@ MISMATCH=0 means Go and Perl emit identical params on every fixture where both s
 | Go missing genome-ID validation | Added `api.RequireGenomeIDs` to 5 genome-bearing commands |
 | Perl genome-assembly rejected `--genome-size` | Added to Perl `GetOptions` |
 | Suite stalled on Perl invocations | `user-env.sh` now sourced; `raw_decode` handles trailing output |
+
+### Resolved 2026-06-25
+
+| Issue | Fix |
+|---|---|
+| `p3-all-*` did not emit the data type's ID as the first column (default returned the full field list; `--attr` was returned verbatim) | Added `cli.SelectIDCentricFields`, mirroring Perl `P3Utils::select_clause` with `idFlag=1`: no `--attr` → ID column only; with `--attr` → comma-split and ID prepended unless already present. Applied to all 10 `p3-all-*` commands; `IDColumns` verified against Perl `IDCOL`. |
 
 ### Remaining ERROR class
 
